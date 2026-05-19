@@ -13,7 +13,7 @@ public class VariableInstanceGenerator : EditorWindow
     private string[] derivedTypeNames;
     private int selectedTypeIndex;
 
-    [MenuItem("Awais/Variables/Create Instance")]
+    [MenuItem("Bubbles/Variables/Create Instance")]
     public static void ShowWindow()
     {
         GetWindow<VariableInstanceGenerator>("Create Instance");
