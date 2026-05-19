@@ -6,26 +6,33 @@ using System.Linq;
 
 public class VariableGenerator : EditorWindow
 {
+
+
+    #region  MENU_ITEMS
     private string typeName = "";
     private string suffix = "Variable";
 
-    [MenuItem("Awais/Variables/New Variable From Type")]
+
+    [MenuItem("Awais/Variables/Create Variable")]
     public static void ShowWindow()
     {
         GetWindow<VariableGenerator>("Create Variable");
     }
-
     private void OnGUI()
     {
-        GUILayout.Label("Enter Type Name", EditorStyles.boldLabel);
+        // --- Generate Section ---
+        GUILayout.Label("Generate Variable Class", EditorStyles.boldLabel);
         typeName = EditorGUILayout.TextField("Type:", typeName);
 
+        GUI.enabled = !string.IsNullOrEmpty(typeName);
         if (GUILayout.Button("Generate"))
         {
             Generate();
         }
-    }
+}
+    #endregion
 
+    #region CORE
     private void Generate()
     {
         if (string.IsNullOrEmpty(typeName))
@@ -74,10 +81,13 @@ public class {className} : Base<{typeName}>
 
         File.WriteAllText(path, script);
         AssetDatabase.Refresh();
+        
 
         Debug.Log($"{className} created successfully.");
     }
+    #endregion
 
+    #region HELPER
     private string GenerateOverrides(Type closedBaseType)
     {
         var methods = closedBaseType
@@ -135,6 +145,5 @@ public class {className} : Base<{typeName}>
 
         return type.FullName; // fallback for classes
     }
-
-
+    #endregion
 }
