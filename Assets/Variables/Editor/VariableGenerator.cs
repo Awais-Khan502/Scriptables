@@ -13,7 +13,7 @@ public class VariableGenerator : EditorWindow
     private string suffix = "Variable";
 
 
-    [MenuItem("Awais/Variables/Create Variable")]
+    [MenuItem("Bubbles/Variables/Create Variable")]
     public static void ShowWindow()
     {
         GetWindow<VariableGenerator>("Create Variable");
