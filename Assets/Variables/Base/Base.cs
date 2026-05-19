@@ -3,71 +3,63 @@ using UnityEngine;
 using Newtonsoft;
 using Newtonsoft.Json;
 using System.IO;
-using Unity.Properties;
-using UnityEditor;
-using UnityEditor.Overlays;
+using System.ComponentModel;
 
-public abstract class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValue<T>, ILoadValue<T>
+public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValue, ILoadValue , IPathValidator
 {
     [SerializeField] private T value;
-    [SerializeField] private string _path;
+    private string _path;
 
-    private void Awake()
+    public void ValidatePath()
     {
-        _path = Application.persistentDataPath + _path;
-    }
-    public void OnValidate()
-    {
-#if UNITY_EDITOR
-        CheckPath();
-#endif
-    SaveValue();
-    }
+         
+        string basePath = Path.Combine(Application.persistentDataPath, name);
+        _path = basePath + ".json";
 
-#if UNITY_EDITOR
-    private void CheckPath()
-    {
-        // if (string.IsNullOrEmpty(_path))
-        //     return;
-
-        // if (Directory.Exists(_path) || File.Exists(_path))
-        // {
-        //     UnityEditor.EditorUtility.DisplayDialog(
-        //         "Path Exists",
-        //         $"The path \"{_path}\" already exists.",
-        //         "OK"
-        //     );
-        //     _path = "";
-        // }
-    }
-#endif
+        int counter = 1;
+        while (File.Exists(_path))
+        {
+            _path = $"{basePath}_{counter}.json";
+            counter++;
+        }
+        Debug.Log("Path Validated : " + _path);
+    }//
 
     private void OnEnable()
     {
-        value = LoadValue();
+        ValidatePath();
+        LoadValue();
     }
     public virtual T GetValue(T value)
     {
         return value;
     }
 
-    public T LoadValue()
+    public bool LoadValue()
     {
-        if (!File.Exists(_path))
-            return value;
+        if(string.IsNullOrEmpty(_path) || !File.Exists(_path))
+        {
+            return false;
+        }
         else
         {
             string json = File.ReadAllText(_path);
-            return JsonConvert.DeserializeObject<T>(json);     
+            value =  JsonConvert.DeserializeObject<T>(json);     
+            return true;
         }
     }
     public void SaveValue()
     {
+        if(string.IsNullOrEmpty(_path) )
+        {
+            Debug.Log(" Path is Empty");
+            return;
+        }
         string json = JsonConvert.SerializeObject(value, Formatting.Indented);
         File.WriteAllText(_path, json);
         Debug.Log( " Data Saved : " + json); 
+        Debug.Log( " Path :  " + _path );
     }
-
     public virtual void SetValue(T value)
     {
         this.value = value;
