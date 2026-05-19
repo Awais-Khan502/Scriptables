@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface ILoadValue<T>
+public interface ILoadValue
 {
-    public T LoadValue();
+    public bool LoadValue();
 }

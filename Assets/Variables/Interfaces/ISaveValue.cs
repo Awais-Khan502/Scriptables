@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface ISaveValue<T>
+public interface ISaveValue
 {
     public void SaveValue();
 }
