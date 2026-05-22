@@ -5,9 +5,9 @@ using Newtonsoft.Json;
 using System.IO;
 using System.ComponentModel;
 
-public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValue, ILoadValue , IPathValidator
+public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValue, ILoadValue , IPathValidator , IValueModifier<T>
 {
-    [SerializeField] private T value;
+    [field:SerializeField] public T value {get; private set;}
     private string _path;
 
     public void ValidatePath()
@@ -63,6 +63,12 @@ public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValu
     public virtual void SetValue(T value)
     {
         this.value = value;
+        SaveValue();
+    }
+
+    public virtual void ModifyValue(Action<T> modifier)
+    {
+        modifier(value);
         SaveValue();
     }
 }
