@@ -111,10 +111,8 @@ public class {className} : Base<{typeName}>
             string returnType = GetCSharpTypeName(method.ReturnType);
 
             var parameters = method.GetParameters();
-            // string paramList = string.Join(", ",
-            //     parameters.Select(p => $"{p.ParameterType.Name} {p.Name}"));
 
-                    // Collect namespaces from parameters
+            // Collect namespaces from parameters
             foreach (var p in parameters)
             {
                 CollectNamespaces(p.ParameterType, requiredNamespaces);
@@ -148,17 +146,6 @@ public class {className} : Base<{typeName}>
         if (type == typeof(string)) return "string";
         if (type == typeof(object)) return "object";
 
-        // // Handle generics
-        // if (type.IsGenericType)
-        // {
-        //     string typeName = type.Name;
-        //     int index = typeName.IndexOf('`');
-        //     if (index > 0) typeName = typeName.Substring(0, index); // remove `1 etc
-
-        //     string genericArgs = string.Join(", ", type.GetGenericArguments().Select(t => GetCSharpTypeName(t)));
-        //     return $"{typeName}<{genericArgs}>";
-        // }
-
         // return type.FullName; // fallback for classes
         if (!type.IsGenericType)
             return type.Name;
@@ -173,16 +160,16 @@ public class {className} : Base<{typeName}>
         return $"{genericTypeName}<{genericArgs}>";
     }
     private void CollectNamespaces(Type type, HashSet<string> namespaces)
-{
-    if (type.Namespace != null)
-        namespaces.Add(type.Namespace);
-
-    // Recurse into generic arguments e.g Action<KnightProfile>
-    if (type.IsGenericType)
     {
-        foreach (var arg in type.GetGenericArguments())
-            CollectNamespaces(arg, namespaces);
+        if (type.Namespace != null)
+            namespaces.Add(type.Namespace);
+
+        // Recurse into generic arguments e.g Action<KnightProfile>
+        if (type.IsGenericType)
+        {
+            foreach (var arg in type.GetGenericArguments())
+                CollectNamespaces(arg, namespaces);
+        }
     }
-}
     #endregion
 }
