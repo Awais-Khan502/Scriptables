@@ -88,4 +88,8 @@ public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValu
     }
 }
 
+[System.AttributeUsage(System.AttributeTargets.Class)]
+public class RefVariableAttribute : System.Attribute { }
 
+[System.AttributeUsage(System.AttributeTargets.Class)]
+public class UnityValueVariableAttribute : System.Attribute { }
