@@ -3,4 +3,4 @@ using UnityEngine;
 
 [RefVariable]
 [CreateAssetMenu(menuName = "Bubbles/Ref/Rigidbody2D")]
-public class Rigidbody2DVariable : Base<Rigidbody2D> { }
+public class Rigidbody2DVariable : ReferenceVariable<Rigidbody2D> { }

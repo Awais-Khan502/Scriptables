@@ -3,4 +3,4 @@ using UnityEngine;
 
 [RefVariable]
 [CreateAssetMenu(menuName = "Bubbles/Ref/Sprite")]
-public class SpriteVariable : Base<Sprite> { }
+public class SpriteVariable : ReferenceVariable<Sprite> { }

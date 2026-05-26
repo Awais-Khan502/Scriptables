@@ -3,4 +3,4 @@ using UnityEngine;
 
 [RefVariable]
 [CreateAssetMenu(menuName = "Bubbles/Ref/AudioClip")]
-public class AudioClipVariable : Base<AudioClip> { }
+public class AudioClipVariable : ReferenceVariable<AudioClip> { }
