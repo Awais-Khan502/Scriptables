@@ -2,31 +2,32 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(Base<>), true)] // true = applies to derived classes too
+[CustomEditor(typeof(Base<>), true)]
 public class BaseEditor : Editor
 {
     public override void OnInspectorGUI()
     {
-        DrawDefaultInspector(); // draws normal fields
+        DrawDefaultInspector();
 
-        ISaveValue saveValue = (ISaveValue)target;
-        IPathValidator pathValidator = (IPathValidator)target;
-        ILoadValue loadValue = (ILoadValue)target;
-        GUILayout.Space(10);
+        bool persistValue = serializedObject.FindProperty("persistValue").boolValue;
 
-        if (GUILayout.Button("Save Value"))
+        if (persistValue)
         {
-            saveValue.SaveValue();
+            ISaveValue saveValue       = (ISaveValue)target;
+            IPathValidator pathValidator = (IPathValidator)target;
+            ILoadValue loadValue       = (ILoadValue)target;
+
+            GUILayout.Space(10);
+
+            if (GUILayout.Button("Save Value"))
+                saveValue.SaveValue();
+
+            if (GUILayout.Button("Load Value"))
+                loadValue.LoadValue();
+
+            if (GUILayout.Button("Validate Path"))
+                pathValidator.ValidatePath();
         }
-        if (GUILayout.Button("Load Value"))
-        {
-            loadValue.LoadValue();
-        }
-        if (GUILayout.Button("Validate path"))
-        {
-            pathValidator.ValidatePath();
-        }
-        
     }
 }
 #endif
