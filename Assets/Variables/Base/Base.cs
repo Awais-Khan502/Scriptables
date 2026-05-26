@@ -30,7 +30,7 @@ public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValu
 
     private void OnEnable()
     {
-        if (persistValue)
+        if (!persistValue)
         {
             value = defaultValue;
         }
@@ -47,7 +47,7 @@ public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValu
         return value;
     }
 
-    public bool LoadValue()
+    public virtual bool LoadValue()
     {
         if(string.IsNullOrEmpty(_path) || !File.Exists(_path))
         {
@@ -61,9 +61,9 @@ public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValu
             return true;
         }
     }
-    public void SaveValue()
+    public virtual void SaveValue()
     {
-        if(persistValue) return;
+        if(!persistValue) return;
         if(string.IsNullOrEmpty(_path) )
         {
             Debug.Log(" Path is Empty");
@@ -82,6 +82,7 @@ public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValu
 
     public virtual void ModifyValue(Action<T> modifier)
     {
+        if(value == null) return;
         modifier(value);
         SaveValue();
     }
