@@ -304,7 +304,7 @@ public class VariableInstanceGenerator : EditorWindow
             .Where(t => t.IsClass && !t.IsAbstract
                      && t.BaseType != null
                      && t.BaseType.IsGenericType
-                     && t.BaseType.GetGenericTypeDefinition() == typeof(Base<>)
+                     && t.BaseType.GetGenericTypeDefinition() == typeof(DataVariable<>)
                      && !BuiltInTypeNames.Contains(t.Name))
             .Select(t => t.Name)
             .ToArray();

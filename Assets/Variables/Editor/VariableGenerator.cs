@@ -68,8 +68,8 @@ public class VariableGenerator : EditorWindow
             return;
         }
 
-        Type baseGenericType = typeof(Base<>);
-        Type closedBaseType = typeof(Base<>).MakeGenericType(foundType);
+        Type baseGenericType = typeof(DataVariable<>);
+        Type closedBaseType = typeof(DataVariable<>).MakeGenericType(foundType);
         HashSet<string> requiredNamespaces;
 
         string overrides = GenerateOverrides(closedBaseType , out requiredNamespaces);
@@ -80,7 +80,7 @@ $@"{usings}
 using UnityEngine;
 
 [CreateAssetMenu(menuName = ""Variables/{className}"")]
-public class {className} : Base<{typeName}>
+public class {className} : DataVariable<{typeName}>
 {{
     {overrides}
 }}";
