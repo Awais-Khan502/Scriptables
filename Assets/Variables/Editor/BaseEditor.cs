@@ -1,4 +1,5 @@
-#if UNITY_EDITOR
+using System;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,27 +8,68 @@ public class BaseEditor : Editor
 {
     public override void OnInspectorGUI()
     {
+        Type type = target.GetType();
+
+        if (type.GetCustomAttribute<RefVariableAttribute>() != null)
+        {
+            DrawExcluding("persistValue");
+            EditorGUILayout.HelpBox("Ref type — no saving mechanics available.", MessageType.Info);
+            return;
+        }
+
+        // if (type.GetCustomAttribute<UnityValueVariableAttribute>() != null)
+        // {
+        //     return;
+        // }
+
+        // Primitives and custom classes
         DrawDefaultInspector();
 
-        bool persistValue = serializedObject.FindProperty("persistValue").boolValue;
+        SerializedProperty persistProp = serializedObject.FindProperty("persistValue");
+        if (persistProp == null) return;
 
-        if (persistValue)
+        if (persistProp.boolValue)
         {
-            ISaveValue saveValue       = (ISaveValue)target;
-            IPathValidator pathValidator = (IPathValidator)target;
-            ILoadValue loadValue       = (ILoadValue)target;
-
             GUILayout.Space(10);
 
             if (GUILayout.Button("Save Value"))
-                saveValue.SaveValue();
+                ((ISaveValue)target).SaveValue();
 
             if (GUILayout.Button("Load Value"))
-                loadValue.LoadValue();
+                ((ILoadValue)target).LoadValue();
 
             if (GUILayout.Button("Validate Path"))
-                pathValidator.ValidatePath();
+                ((IPathValidator)target).ValidatePath();
         }
     }
+    private void DrawValueFieldOnly()
+    {
+        serializedObject.Update();
+        SerializedProperty prop = serializedObject.GetIterator();
+        prop.NextVisible(true); // skip script field
+
+        while (prop.NextVisible(false))
+        {
+            if (prop.name == "value")
+            {
+                EditorGUILayout.PropertyField(prop, true);
+                break;
+            }
+        }
+        serializedObject.ApplyModifiedProperties();
+    }
+
+    private void DrawExcluding(params string[] excludedFields)
+    {
+        serializedObject.Update();
+        SerializedProperty prop = serializedObject.GetIterator();
+        prop.NextVisible(true); // skip script field
+
+        while (prop.NextVisible(false))
+        {
+            if (!Array.Exists(excludedFields, f => f == prop.name))
+                EditorGUILayout.PropertyField(prop, true);
+        }
+        serializedObject.ApplyModifiedProperties();
+    }
 }
-#endif

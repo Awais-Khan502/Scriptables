@@ -2,5 +2,5 @@ using UnityEngine;
 
 public interface ILoadValue
 {
-    public bool LoadValue();
+    public void LoadValue();
 }

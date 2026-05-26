@@ -1,8 +1,9 @@
 // StringVariable.cs
 using UnityEngine;
 
+[UnityValueVariable]
 [CreateAssetMenu(menuName = "Variables/StringVariable")]
-public class DoubleVariable : Base<double>
+public class DoubleVariable : DataVariable<double>
 {
     
 }
