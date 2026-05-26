@@ -8,6 +8,9 @@ using System.ComponentModel;
 public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValue, ILoadValue , IPathValidator , IValueModifier<T>
 {
     [field:SerializeField] public T value {get; private set;}
+    [SerializeField] private T defaultValue;
+    [SerializeField] private bool persistValue = false;
+
     private string _path;
 
     public void ValidatePath()
@@ -27,8 +30,17 @@ public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValu
 
     private void OnEnable()
     {
-        ValidatePath();
-        LoadValue();
+        if (persistValue)
+        {
+            value = defaultValue;
+        }
+        else
+        {
+            ValidatePath();
+            LoadValue();
+        }
+            
+       
     }
     public virtual T GetValue(T value)
     {
@@ -39,6 +51,7 @@ public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValu
     {
         if(string.IsNullOrEmpty(_path) || !File.Exists(_path))
         {
+            value = defaultValue;
             return false;
         }
         else
@@ -50,6 +63,7 @@ public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValu
     }
     public void SaveValue()
     {
+        if(persistValue) return;
         if(string.IsNullOrEmpty(_path) )
         {
             Debug.Log(" Path is Empty");
