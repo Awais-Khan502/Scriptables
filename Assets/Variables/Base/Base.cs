@@ -35,7 +35,7 @@ public class Base<T> : ScriptableObject, ISetValue<T>  , IGetValue<T>, ISaveValu
         }
         else
         {
-            ValidatePath();
+            //ValidatePath();
             LoadValue();
         } 
     }
