@@ -266,7 +266,7 @@ public class VariableInstanceGenerator : EditorWindow
             className,
             "asset",
             "Choose location for the asset",
-            "Assets/Variables/Instances"
+            "Assets/Bubbles/Variables/Instances"
         );
 
         if (string.IsNullOrEmpty(assetName)) return;
