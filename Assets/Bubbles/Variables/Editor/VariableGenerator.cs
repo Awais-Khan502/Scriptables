@@ -60,7 +60,7 @@ public class VariableGenerator : EditorWindow
         }
 
         string className = typeName + suffix;
-        string path = $"Assets/Variables/Classes/{className}.cs";
+        string path = $"Assets/Bubbles/Variables/Classes/{className}.cs";
 
         if (File.Exists(path))
         {
