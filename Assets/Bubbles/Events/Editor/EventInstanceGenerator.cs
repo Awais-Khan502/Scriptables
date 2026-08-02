@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Collections.Generic;
 
 public class EventInstanceGenerator : EditorWindow
 {
@@ -21,6 +22,7 @@ public class EventInstanceGenerator : EditorWindow
 
     private string[] _derivedEventNames;
     private int _selectedIndex;
+    private Vector2 _scrollPosition;
 
     #endregion
 
@@ -34,28 +36,90 @@ public class EventInstanceGenerator : EditorWindow
     private void OnGUI()
     {
         InitStyles();
+        _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
 
-        DrawSectionHeader("Create Event Asset", new Color(0.90f, 0.50f, 1.00f));
+        DrawSectionHeader("Custom Events", new Color(0.90f, 0.50f, 1.00f));
         EditorGUILayout.Space(5);
 
         if (_derivedEventNames == null || _derivedEventNames.Length == 0)
         {
-            EditorGUILayout.HelpBox("No classes derived from BaseEvent<T> found. Generate one first.", MessageType.Info);
-
+            EditorGUILayout.HelpBox("No custom events found. Generate one first.", MessageType.Info);
             if (GUILayout.Button("Refresh")) RefreshEventTypes();
-            return;
+        }
+        else
+        {
+            GUILayout.BeginHorizontal();
+            _selectedIndex = EditorGUILayout.Popup("Event:", _selectedIndex, _derivedEventNames);
+            if (GUILayout.Button("↺", GUILayout.Width(25))) RefreshEventTypes();
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.Space(5);
+            DrawColoredButton($"Create {_derivedEventNames[_selectedIndex]} Asset",
+                new Color(0.90f, 0.50f, 1.00f), () => CreateAsset(_derivedEventNames[_selectedIndex]));
         }
 
-        GUILayout.BeginHorizontal();
-        _selectedIndex = EditorGUILayout.Popup("Event:", _selectedIndex, _derivedEventNames);
-        if (GUILayout.Button("↺", GUILayout.Width(25))) RefreshEventTypes();
-        GUILayout.EndHorizontal();
+        EditorGUILayout.Space(10);
+        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+        DrawPrimitiveEvents();
 
+        EditorGUILayout.Space(10);
+        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+        DrawUnityValueEvents();
+
+        EditorGUILayout.EndScrollView();
+    }
+
+    #endregion
+
+    #region PRIMITIVE_EVENTS
+
+    private static readonly Color IntEventColor    = new Color(0.40f, 0.95f, 0.55f);
+    private static readonly Color FloatEventColor  = new Color(0.35f, 0.75f, 1.00f);
+    private static readonly Color DoubleEventColor = new Color(0.25f, 0.60f, 0.95f);
+    private static readonly Color BoolEventColor   = new Color(1.00f, 0.45f, 0.45f);
+    private static readonly Color StringEventColor = new Color(1.00f, 0.80f, 0.25f);
+
+    private void DrawPrimitiveEvents()
+    {
+        DrawSectionHeader("Primitive Events", new Color(1.00f, 0.80f, 0.25f));
         EditorGUILayout.Space(5);
-        DrawColoredButton($"Create {_derivedEventNames[_selectedIndex]} Asset", new Color(0.90f, 0.50f, 1.00f), () =>
-        {
-            CreateAsset(_derivedEventNames[_selectedIndex]);
-        });
+
+        DrawEqualButtons(
+            ("Int",    IntEventColor,    () => CreateAsset("IntEvent")),
+            ("Float",  FloatEventColor,  () => CreateAsset("FloatEvent")),
+            ("Double", DoubleEventColor, () => CreateAsset("DoubleEvent"))
+        );
+        DrawEqualButtons(
+            ("Bool",   BoolEventColor,   () => CreateAsset("BoolEvent")),
+            ("String", StringEventColor, () => CreateAsset("StringEvent")),
+            ("",       Color.clear,      null)
+        );
+    }
+
+    #endregion
+
+    #region UNITY_VALUE_EVENTS
+
+    private static readonly Color Vector2EventColor    = new Color(0.75f, 0.45f, 1.00f);
+    private static readonly Color Vector3EventColor    = new Color(0.60f, 0.35f, 0.95f);
+    private static readonly Color Vector2IntEventColor = new Color(0.90f, 0.40f, 0.90f);
+    private static readonly Color Vector3IntEventColor = new Color(0.75f, 0.30f, 0.80f);
+
+    private void DrawUnityValueEvents()
+    {
+        DrawSectionHeader("Unity Value Events", new Color(0.75f, 0.45f, 1.00f));
+        EditorGUILayout.Space(5);
+
+        DrawEqualButtons(
+            ("Vector2",    Vector2EventColor,    () => CreateAsset("Vector2Event")),
+            ("Vector3",    Vector3EventColor,    () => CreateAsset("Vector3Event")),
+            ("Vector2Int", Vector2IntEventColor, () => CreateAsset("Vector2IntEvent"))
+        );
+        DrawEqualButtons(
+            ("Vector3Int", Vector3IntEventColor, () => CreateAsset("Vector3IntEvent")),
+            ("",           Color.clear,          null),
+            ("",           Color.clear,          null)
+        );
     }
 
     #endregion
@@ -99,6 +163,12 @@ public class EventInstanceGenerator : EditorWindow
 
     #region HELPER
 
+    private static readonly HashSet<string> BuiltInEventNames = new HashSet<string>
+    {
+        "IntEvent", "FloatEvent", "DoubleEvent", "BoolEvent", "StringEvent",
+        "Vector2Event", "Vector3Event", "Vector2IntEvent", "Vector3IntEvent"
+    };
+
     private void RefreshEventTypes()
     {
         _derivedEventNames = AppDomain.CurrentDomain
@@ -107,7 +177,8 @@ public class EventInstanceGenerator : EditorWindow
             .Where(t => t.IsClass && !t.IsAbstract
                      && t.BaseType != null
                      && t.BaseType.IsGenericType
-                     && t.BaseType.GetGenericTypeDefinition() == typeof(BaseEvent<>))
+                     && t.BaseType.GetGenericTypeDefinition() == typeof(BaseEvent<>)
+                     && !BuiltInEventNames.Contains(t.Name))
             .Select(t => t.Name)
             .ToArray();
     }
@@ -151,6 +222,24 @@ public class EventInstanceGenerator : EditorWindow
         if (GUILayout.Button(label, _buttonStyle))
             onClick?.Invoke();
         GUI.backgroundColor = prev;
+    }
+
+    private void DrawEqualButtons(params (string label, Color color, Action onClick)[] buttons)
+    {
+        float buttonWidth = (EditorGUIUtility.currentViewWidth - 10) / buttons.Length;
+
+        GUILayout.BeginHorizontal();
+        foreach (var (label, color, onClick) in buttons)
+        {
+            Color prev = GUI.backgroundColor;
+            GUI.backgroundColor = label == "" ? Color.clear : color;
+            GUI.enabled = label != "";
+            if (GUILayout.Button(label, _buttonStyle, GUILayout.Width(buttonWidth)))
+                onClick?.Invoke();
+            GUI.backgroundColor = prev;
+            GUI.enabled = true;
+        }
+        GUILayout.EndHorizontal();
     }
 
     #endregion
